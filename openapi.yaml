@@ -1,123 +1,113 @@
+
 openapi: 3.0.3
 info:
-  title: GVC eSIM Activation API
-  version: 1.0.0
-  description: API to order and assign eSIM plans via eSIM-GO.
+  title: GVC eSIM API
+  version: "1.0.0"
+  description: API documentation for eSIM management provided by Global Voice Connect.
 
 servers:
-  - url: https://api.esim-go.com/v2.4
+  - url: https://globalesim.net/api
 
 paths:
-  /orders:
+  /country-plans:
     post:
-      summary: Activate a new eSIM bundle
-      description: Places an order to activate a new eSIM bundle using eSIM-GO.
-      operationId: createEsimOrder
-      tags:
-        - eSIM Activation
+      summary: Get plans by ISO2 country
       requestBody:
-        required: true
         content:
-          application/json:
+          application/x-www-form-urlencoded:
             schema:
               type: object
-              required:
-                - type
-                - assign
-                - Order
+              required: [username, password, iso2_country]
               properties:
-                type:
+                username:
                   type: string
-                  example: transaction
-                assign:
-                  type: boolean
-                  example: true
-                Order:
-                  type: array
-                  items:
-                    type: object
-                    required:
-                      - type
-                      - quantity
-                      - item
-                      - allowReassign
-                      - iccids
-                    properties:
-                      type:
-                        type: string
-                        example: bundle
-                      quantity:
-                        type: integer
-                        example: 1
-                      item:
-                        type: string
-                        example: esim_1GB_7D_AL_V2
-                      iccids:
-                        type: array
-                        items:
-                          type: string
-                        example: []
-                      allowReassign:
-                        type: boolean
-                        example: true
+                password:
+                  type: string
+                iso2_country:
+                  type: string
+                  example: US
       responses:
         '200':
-          description: eSIM Order placed successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  orderReference:
-                    type: string
-                    example: ORD-20240312345
-                  status:
-                    type: string
-                    example: Success
-                  Data:
-                    type: object
-                    properties:
-                      esims:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            iccid:
-                              type: string
-                              example: 89882123456789012345
-                            msisdn:
-                              type: string
-                              example: ""
-                            sku:
-                              type: string
-                              example: esim_1GB_7D_AL_V2
-                            qrcode_url:
-                              type: string
-                              example: https://cdn.esim-go.com/qr/abc123.png
-                            activationDate:
-                              type: string
-                              example: 31-03-2025
-                      currency:
-                        type: string
-                        example: USD
-                      amount:
-                        type: number
-                        example: 10.00
-                      openingBalance:
-                        type: number
-                        example: 100
-                      closingBalance:
-                        type: number
-                        example: 90
-                  Msg:
-                    type: string
-                    example: Order created successfully
-        '400':
-          description: Invalid request
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '500':
-          description: Server error
-components: {}
+          description: Successful response with plans list
+
+  /esim_apply:
+    post:
+      summary: Activate an eSIM plan
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [bundle, email, password]
+              properties:
+                bundle:
+                  type: string
+                  example: esims_1GB_7D_AL_V2
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+      responses:
+        '200':
+          description: eSIM activated successfully
+
+  /esim_balance:
+    post:
+      summary: Check eSIM balance
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [username, password, iccid]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                iccid:
+                  type: string
+      responses:
+        '200':
+          description: Successful balance response
+
+  /location:
+    post:
+      summary: Get last known location of eSIM
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [username, password, iccid]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                iccid:
+                  type: string
+      responses:
+        '200':
+          description: Location details returned
+
+  /esim_recharge:
+    post:
+      summary: Recharge an eSIM
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [username, password, iccid]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                iccid:
+                  type: string
+      responses:
+        '200':
+          description: Recharge was successful
